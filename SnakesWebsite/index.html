@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--Head Content-->
+        <title>Environment Management</title>
+        <!-- Required meta tags -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Links -->
+         
+        <!-- Make It Pretty Import the Bootstrap stylesheet -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    </head>
+    <body>
+        <main>
+            <div class="mt-2 mb-2">
+                <h1>Android Blockchain Game</h1>
+             </div>
+             <hr>
+             <div>
+                  <div id="resultSpace"></div>
+             </div>
+            <div class="container">
+                <button onclick="AddSnakesPrueba()">Add Snakes-Token</button>           
+            </div>
+        </main>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+    <script>
+ var web3;
+checkWeb3();
+
+async function connectWallet() {
+    accounts = await window.ethereum.request({method: "eth_requestAccounts"}).catch((err)=>{
+        //error handling
+        console.log(err.code)
+    })
+
+    console.log(accounts)
+}
+
+function displayMessage(messageType, message){
+    messages = {
+        "00":`<div class= "alert alert-success"> ${message} </div>`,
+        "01":`<div class= "alert alert-danger"> ${message} </div>`
+    }
+    document.getElementById("resultSpace").innerHTML = messages[messageType];
+}
+
+async function checkWeb3(){
+    const ethereum = window.ethereum;
+    if(!ethereum || !ethereum.on) {
+        displayMessage("01", "This App Requires MetaMask, Please Install MetaMask");
+    }
+    else{
+        //displayMessage("00", "Metamask is Installed");
+        setWeb3Environment()
+    }
+}
+
+function setWeb3Environment(){
+    web3 = new Web3(window.ethereum);
+    getNetwork();
+    monitorNetwork();
+}
+
+async function getNetwork(){
+    chainID = await web3.eth.net.getId();
+    displayMessage("00","Active network is "+ getNetworkName(chainID));
+}
+
+async function AddSnakesPrueba(){
+    
+    const accounts = await web3.eth.getAccounts();
+    const recividor = accounts[0];
+
+    if(recividor == undefined) {
+        connectWallet();
+    } else if (recividor != undefined) {
+      checkTestnet();
+    }
+       
+}
+
+async function checkTestnet(){
+  chainID = await web3.eth.net.getId();
+  if(chainID != 97){
+    AgregarTestnet();
+  } else if (chainID == 97) {
+    AgregarSnakesTestnet();
+  }
+}
+
+
+async function AgregarTestnet(){
+    window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+        chainId: '0x61',
+        chainName: 'Binance Smart Chain Testnet',
+        nativeCurrency: {
+            name: 'Binance Coin',
+            symbol: 'BNB',
+            decimals: 18
+        },
+        rpcUrls: ['https://data-seed-prebsc-1-s1.binance.org:8545/'],
+        blockExplorerUrls: ['https://testnet.bscscan.com']
+        }]
+        })
+        .catch((error) => {
+        console.log(error)
+        })
+}
+
+
+async function AgregarSnakesTestnet() {
+    ethereum
+  .request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20',
+      options: {
+        address: '0x549e80263f03334eB4Af74497F8B5D3B7Fda2BFB',
+        symbol: 'SNAKES-T',
+        decimals: 18,
+        image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/15587.png',
+      },
+    },
+  })
+  .then((success) => {
+    if (success) {
+      console.log('SNAKES-Tokens successfully added to wallet!')
+    } else {
+      throw new Error('Something went wrong.')
+    }
+  })
+  .catch(console.error)
+}
+
+    </script>
+    </body>
+</html>
